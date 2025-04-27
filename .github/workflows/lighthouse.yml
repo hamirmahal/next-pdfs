@@ -1,0 +1,22 @@
+# https://dev.to/joerismits/ensure-your-nextjs-apps-performance-is-top-notch-with-lighthouse-ci-and-github-actions-4ne8#integrate-lighthouse-ci-with-github-actions
+# This action will run `npm install` and `npm run build` every time a new commit is pushed.
+# It will then execute Lighthouse and upload the results.
+# Because we added the LHCI_GITHUB_APP_TOKEN, the results will be attached as new status checks
+# and will pass or fail based on the assert configuration in `.lighthouserc.json`.
+on: [push, workflow_dispatch]
+
+name: Lighthouse
+jobs:
+  lighthouse:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+      - run: npm install && npm install -g @lhci/cli
+      - run: npm run build
+      - run: lhci collect
+      - run: lhci upload
+        env:
+          LHCI_GITHUB_APP_TOKEN: ${{ secrets.LHCI_GITHUB_APP_TOKEN }}
